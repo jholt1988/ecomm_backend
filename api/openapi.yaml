@@ -1,0 +1,709 @@
+openapi: 3.0.3
+info:
+  title: Bentley Men's Clothing.
+  description: "A application for a Men's Clothing Store. This application allows\
+    \ users to registers, login, create, profile, browse merchandise, select merchandise,\
+    \ place orders, and track deliveries."
+  contact:
+    name: Jordan A Holt
+    email: jordanh316@gmail.com
+  version: "1.0"
+servers:
+- url: http://localhost:8081
+  description: dev
+tags:
+- name: users
+  description: 'User basic information '
+- name: profiles
+  description: 'Specific user information. '
+- name: store
+  description: All about the products we offer.
+- name: cart
+  description: Items user selected to purchase.
+- name: orders
+  description: Any thing dealing with user orders
+- name: auth
+  description: Everything to do with user registration and login
+- name: delivery
+  description: Anything to do with order deliveries
+paths:
+  /auth/register:
+    summary: Registers a new user
+    description: This path adds a new user to database.
+    post:
+      tags:
+      - auth
+      - users
+      summary: Adds a new user records to system
+      description: Creates a new user record to systems
+      operationId: auth_Register
+      requestBody:
+        description: A new user object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user'
+      responses:
+        "200":
+          description: User created
+          content:
+            application/json:
+              examples:
+                New User:
+                  value: |
+                    { "user" :  {"firstName":"testUser", "lastName" : "Smith",  "password":"<uuid_string>",  "email":"t.smith@test.com", "username": "mrsmith007"}}
+        default:
+          description: Default error sample response
+      x-swagger-router-controller: Auth
+  /auth/login:
+    summary: Authenticates and authorizes a user
+    description: This path allows a user to login to use the system
+    post:
+      tags:
+      - auth
+      - users
+      summary: Authenticate and authorizes a user to use a system
+      description: 'This operation login a user into the system '
+      operationId: auth_Login
+      requestBody:
+        description: A user and profile object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/profile'
+      responses:
+        "200":
+          description: User succesfully logged in
+          content:
+            application/json:
+              examples:
+                loggedInUser:
+                  value: "{ \"user\" : {\n\"id\":\"<uuid_string>\",\n\"firstName\"\
+                    :\"testUser\",\n\"lastName\" : \"Smith\", \n\"password\":\"<uuid_string>\"\
+                    , \n\"email\":\"t.smith@test.com\",\n\"username\": \"mrsmith007\"\
+                    }, \n\"profile\" : {\n\"id\" \"<uuid_string>\",\n\"address1\"\
+                    : \"123 N. Main St\",\n\"address2\": \"Apt 201\", \n\"city\":\"\
+                    Wichita\", \n\"state\": \"Kansas\", \n\"zip\": \"33201\", \n\"\
+                    birthday\": \"07/11/1988\", \n\"userID\":\"<uuid_string_userID>\"\
+                    \n }\n}"
+        default:
+          description: Default error sample response
+      x-swagger-router-controller: Auth
+  /users:
+    summary: Gets All users
+    description: This path gets all users
+    get:
+      tags:
+      - users
+      summary: Gets all user records
+      description: This operation gets a user records
+      operationId: get_AllUsers
+      responses:
+        "200":
+          description: Success getting all users
+          content:
+            application/json:
+              examples:
+                List of all users:
+                  value: "{\"users\":[{ \"user\" : \n                    {\"firstName\"\
+                    :\"testUser\",\n                    \"lastName\" : \"Smith\",\
+                    \ \n                    \"password\":\"<uuid_string>\", \n   \
+                    \                 \"email\":\"t.smith@test.com\",\n          \
+                    \          \"username\": \"mrsmith007\"}, \n{ \"user\" : \n  \
+                    \                  {\"firstName\":\"testUser2\",\n           \
+                    \         \"lastName\" : \"Jones\", \n                    \"password\"\
+                    :\"<uuid_string>\", \n                    \"email\":\"t.jones@test.com\"\
+                    ,\n                    \"username\": \"mrsjones007\"}, \n{ \"\
+                    user\" : \n                    {\"firstName\":\"testUser3\",\n\
+                    \                    \"lastName\" : \"Baker\", \n            \
+                    \        \"password\":\"<uuid_string>\", \n                  \
+                    \  \"email\":\"t.baker@test.com\",\n                    \"username\"\
+                    : \"mrbaker007\"}}\n]}"
+        default:
+          description: Default error sample response
+      x-swagger-router-controller: Users
+  /users/profile/{id}:
+    summary: Gets and modifies individual user records
+    description: This path retrieves and modifies individual user records
+    get:
+      tags:
+      - users
+      - profiles
+      summary: Retrieves a individual user and profile record
+      description: This endpoint gets individual user and user profile
+      operationId: get_user
+      parameters:
+      - name: id
+        in: path
+        description: The id of the order.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        default:
+          description: Default error sample response
+      x-swagger-router-controller: Users
+    put:
+      tags:
+      - users
+      - profiles
+      summary: Modifies a user record and user profile
+      description: This endpoint allows for the modification of user records and user
+        profile
+      operationId: update_User
+      parameters:
+      - name: id
+        in: path
+        description: The id of the order.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: Modified user object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user'
+      responses:
+        default:
+          description: Default error sample response
+      x-swagger-router-controller: Users
+    delete:
+      tags:
+      - users
+      - profiles
+      summary: Deletes user record and profile
+      description: This operation deletes user record and profile from database
+      operationId: delete_User
+      parameters:
+      - name: id
+        in: path
+        description: The id of the order.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        default:
+          description: Default error sample response
+      x-swagger-router-controller: Users
+  /store:
+    summary: Retrieves store page
+    description: This endpoint retrieves store main page
+  /store/products:
+    summary: Retrieves all product records
+    description: This endpoint gets all product records
+    get:
+      tags:
+      - store
+      summary: Retrieves all product records
+      description: This endpoint retrieves all product records
+      operationId: get_AllProducts
+      responses:
+        "200":
+          description: success retrieving products list
+          content:
+            application/json:
+              examples:
+                List of products:
+                  value: "{\"products\": [\n {\"product_no\": \"Ver001\", \n\"product_Name\"\
+                    :\"Versace \nSkinny Jeans\", \n\"product_description\":\"The new\
+                    \ skinny cut jeans from Versace\",\n\"product_Vendor\": \"Versace\"\
+                    , \n\"price\": \"120.00\", \n\"total_Quantity\": \"100\", \"quantity_BySize\"\
+                    : {\n  \"sm\":\"25\", \n  \"md\":\"25\", \n  \"lg\":\"25\",\n\
+                    \  \"xlg\":25\n   }\n  },\n   {\"product_no\": \"Nike001\", \n\
+                    \"product_Name\":\"Nike \nSweats\", \n\"product_description\"\
+                    :\"The new sweats  from Nike\",\n\"product_Vendor\": \"Nike\"\
+                    , \n\"price\": \"85.00\", \n\"total_Quantity\": \"100\", \"quantity_BySize\"\
+                    : {\n  \"sm\":\"25\", \n  \"md\":\"25\", \n  \"lg\":\"25\",\n\
+                    \  \"xlg\":25\n   }\n  }\n ]\n}"
+        default:
+          description: Default error sample response
+      x-swagger-router-controller: Store
+  /store/products/{id}:
+    summary: Retrieves individual product records
+    description: This endpoint retrieves and allows for the modification of individual
+      product records.
+    get:
+      tags:
+      - store
+      summary: Retrieves individual product record
+      description: This endpoint retrieves individual product records
+      operationId: get_Product
+      parameters:
+      - name: id
+        in: path
+        description: The id of the product.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: success retrieving product
+          content:
+            application/json:
+              examples:
+                Product:
+                  value: "{\"product\":{\"product_no\": \"Ver001\", \n\"product_Name\"\
+                    :\"Versace \nSkinny Jeans\", \n\"product_description\":\"The new\
+                    \ skinny cut jeans from Versace\",\n\"product_Vendor\": \"Versace\"\
+                    , \n\"price\": \"120.00\", \n\"total_Quantity\": \"100\", \"quantity_BySize\"\
+                    : {\n  \"sm\":\"25\", \n  \"md\":\"25\", \n  \"lg\":\"25\",\n\
+                    \  \"xlg\":25\n   }\n  }\n}"
+        default:
+          description: Default error sample response
+      x-swagger-router-controller: Store
+    put:
+      tags:
+      - store
+      summary: Modifies an individual product record
+      description: This operation allows for a individual product records to modifies
+      operationId: update_Product
+      parameters:
+      - name: id
+        in: path
+        description: The id of the product.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        default:
+          description: Default error sample response
+      x-swagger-router-controller: Store
+    post:
+      tags:
+      - store
+      summary: Adds new product record to system
+      description: This operation adds a new product to system
+      operationId: add_Product
+      parameters:
+      - name: id
+        in: path
+        description: The id of the product.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        default:
+          description: Default error sample response
+      x-swagger-router-controller: Store
+    delete:
+      tags:
+      - store
+      summary: Deletes product records from system
+      description: 'This operation deletes product record from system '
+      operationId: delete_Product
+      parameters:
+      - name: id
+        in: path
+        description: The id of the product.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        default:
+          description: Default error sample response
+      x-swagger-router-controller: Store
+  /users/profile/{id}/cart:
+    summary: Retrieves user cart
+    description: This endpoint allows a user to retrieve and modify their cart
+    get:
+      tags:
+      - cart
+      - users
+      summary: Get user cart
+      description: This endpoint gets a user cart
+      operationId: get_Cart
+      parameters:
+      - name: id
+        in: path
+        description: The id of the user profile.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        default:
+          description: Default error sample response
+      x-swagger-router-controller: Cart
+    put:
+      tags:
+      - cart
+      - users
+      summary: Modifies user cart
+      description: This operation modifies user cart
+      operationId: update_Cart
+      parameters:
+      - name: id
+        in: path
+        description: The id of the user profile.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        default:
+          description: Default error sample response
+      x-swagger-router-controller: Cart
+    post:
+      tags:
+      - cart
+      - users
+      summary: Creates a user cart
+      description: This operation creates a new user cart
+      operationId: add_Cart
+      parameters:
+      - name: id
+        in: path
+        description: The id of the user profile.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        default:
+          description: Default error sample response
+      x-swagger-router-controller: Cart
+    delete:
+      tags:
+      - cart
+      - users
+      summary: Deletes user cart
+      description: This operation deletes user cart
+      operationId: delete_Cart
+      parameters:
+      - name: id
+        in: path
+        description: The id of the user profile.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        default:
+          description: Default error sample response
+      x-swagger-router-controller: Cart
+  /users/profiles/{id}/order:
+    summary: Retrieve all user orders
+    description: This endpoint gets all user orders
+    get:
+      tags:
+      - users
+      - orders
+      summary: Gets all user orders
+      description: This operations gets all user order records
+      operationId: get_AllUserOrders
+      parameters:
+      - name: id
+        in: path
+        description: The id of the user profile.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        default:
+          description: Default error sample response
+      x-swagger-router-controller: Users
+    put:
+      tags:
+      - orders
+      - users
+      summary: Update current user order
+      description: This operation allows current user to modified
+      operationId: update_Order
+      parameters:
+      - name: id
+        in: path
+        description: The id of the user profile.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        default:
+          description: Default error sample response
+      x-swagger-router-controller: Orders
+    post:
+      tags:
+      - orders
+      - users
+      summary: Creates a new user order
+      description: This operation creates a new user order
+      operationId: add_Order
+      parameters:
+      - name: id
+        in: path
+        description: The id of the user profile.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        default:
+          description: Default error sample response
+      x-swagger-router-controller: Orders
+  /users/profiles/{id}/orders/{orderID}:
+    summary: Retrieves individual order records.
+    description: This point retrieves individual order record for users
+    get:
+      tags:
+      - orders
+      - users
+      summary: Retrieves individual user order records
+      description: This endpoint gets a individual order record
+      operationId: get_Order
+      parameters:
+      - name: orderID
+        in: path
+        description: The id of the order.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: id
+        in: path
+        description: The id of the user profile.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        default:
+          description: Default error sample response
+      x-swagger-router-controller: Orders
+    put:
+      tags:
+      - orders
+      - users
+      summary: Modifies an individual user order record
+      description: This operation modifies a individual user record
+      operationId: update_UserOrder
+      parameters:
+      - name: orderID
+        in: path
+        description: The id of the order.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: id
+        in: path
+        description: The id of the user profile.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        default:
+          description: Default error sample response
+      x-swagger-router-controller: Orders
+  /orders:
+    summary: Retrieves all user records
+    description: This endpoint retrieves all user records
+    get:
+      tags:
+      - orders
+      summary: Retrieves all order records
+      description: This endpoint retrieves all order records
+      operationId: get_allOrders
+      responses:
+        default:
+          description: Default error sample response
+      x-swagger-router-controller: Orders
+  /users/{userID}/profile:
+    post:
+      tags:
+      - users
+      - profiles
+      summary: Creates a new user profile
+      description: This operation creates a new user profile
+      operationId: add_Profile
+      parameters:
+      - name: userID
+        in: path
+        description: The id of the user.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        default:
+          description: Default error sample response
+      x-swagger-router-controller: Users
+  /delivery:
+    summary: Retrieves all deliverys
+    description: This path retrieves all deliveries
+    get:
+      tags:
+      - delivery
+      summary: Get all deliveries
+      description: This endpoint retrieves all deliveries
+      operationId: get_AllDeliveries
+      responses:
+        default:
+          description: Default error sample response
+      x-swagger-router-controller: Delivery
+  /delivery/{deliveryID}:
+    summary: Allows retrieve and modify delivery records
+    description: This endpoints retrieves and modifies delivery records for user orders
+    get:
+      tags:
+      - delivery
+      summary: Retrieve delivery records
+      description: 'This endpoint retrieves a individual delivery records '
+      operationId: get_Delivery
+      parameters:
+      - name: deliveryID
+        in: path
+        description: The id of the delivery.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        default:
+          description: Default error sample response
+      x-swagger-router-controller: Delivery
+    put:
+      tags:
+      - delivery
+      summary: Updates delivery record
+      description: This operation modifies user delivery records
+      operationId: update_Delivery
+      parameters:
+      - name: deliveryID
+        in: path
+        description: The id of the delivery.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        default:
+          description: Default error sample response
+      x-swagger-router-controller: Delivery
+components:
+  schemas:
+    user:
+      type: object
+      properties:
+        id:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        password:
+          type: string
+        email:
+          type: string
+        username:
+          type: string
+    profile:
+      type: object
+      properties:
+        id:
+          type: string
+        address1:
+          type: string
+        address2:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zip:
+          type: integer
+        birthdate:
+          type: string
+        userid:
+          type: string 
+    product:
+      type: object
+      properties:
+        product_no:
+          type: string
+        product_name:
+          type: string
+        product_description:
+          type: string
+        product_vendor:
+          type: string
+        price:
+          type: integer
+        quantity_Total:
+          type: integer
+        quantity_BySize:
+          type: object
+    order:
+      type: object
+      properties:
+        orderid:
+          type: integer
+        profileid:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/product'
+        subtotal:
+          type: integer
+        deliverytypeid:
+          type: integer
+        deliveryfee:
+          type: integer
+        total:
+          type: integer
+        status:
+          type: string
+    delivery:
+      type: object
+      properties:
+        deliveryid:
+          type: integer
+        order_id:
+          type: integer 
+        estarrdate:
+          type: string
+        deliveryType:
+          type: integer
+        shipping_addr1:
+          type: string
+        shipping_addr2:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zip:
+          type: integer
+        status:
+          type: string
