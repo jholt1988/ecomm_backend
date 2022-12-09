@@ -16,8 +16,7 @@ function initializeServer( ){
     app.listen(PORT, () => {
         console.log(`Server is listening on PORT: ${PORT}`)
     });
-   app.route("/")
-    app.patch("/", updateProfile)
+ 
     
 }
 

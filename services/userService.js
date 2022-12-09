@@ -7,13 +7,13 @@ module.exports = {
      * @RETURNS A json list of users
      */
 
-   getAllUsers: db.query("SELECT * FROM users", (err,res)=>{
+   getAllUsers: () => db.query("SELECT * FROM users", (err,res)=>{
         if(err){
             console.error(err.message, err.stack)
         }
         if(res){
-            console.log(res.rows)
-            return res.rows
+            console.log(res.rows[0])
+            return res.rows[0]
         }
     }), 
 
@@ -26,8 +26,8 @@ module.exports = {
             console.log(err.message, err.stack)
         }
         if(res){
-            console.log(res.rows)
-            return res.rows
+            console.log(res.rows[0])
+            return res.rows[0]
         }
     })
     
