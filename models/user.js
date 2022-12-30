@@ -51,6 +51,7 @@ class user {
         return this.modDate = Date.now();
 
     }
+
 }
 
 module.exports={

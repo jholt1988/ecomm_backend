@@ -3,38 +3,58 @@ const { profileModel } = require('../models')
 
 module.exports = {
 
-    getUserProfileUserID :  (userID) =>{
-         const text = 'SELECT * FROM profile WHERE userID = $1'
-         const values = [userID]
+    getUserProfileByID:  async (id) =>{
 
-         db.query(text, values, (err, res) => {
-        if (err) {
-            console.error(err.message, err.stack)
-        }
-      console.log(res.rows)
-      return res.rows
+
+      const text = 'SELECT * FROM profile WHERE id = $1'
+       const values=[id]
     
-    })
+        
+      const response = await db.query(text,values, function (err, res) {
+                if (err) {
+                    console.error(err.stack)
+                } else {
 
+                    console.log(res.rows[0])
+                } 
+                return res.rows[0]
 
-},
-
-    updateProfile : (prop, val, id) => {
-        const text = "UPDATE TABLE profile SET $1 = $2 WHERE id=3"
-        const values = [prop, val, id]
-
-        db.query(text, values, (err, res) => {
-
-            if (err) {
-                console.error(err.message, err.stack)
             }
-            if (res) {
-                console.log(res.rows)
-                return res.rows
-            }
+        ).then(result => {
+            return result.rows
+        }) 
+      return response
+        },
+
+     
+
+    
 
 
+    updateProfile : async (prop, val, id) => {
+        const text = `UPDATE profile SET ${prop} = $1 WHERE id= $2`
+        const values = [ val, id]
+
+       const response = await  db.query(text, values).then(res =>{
+        return res.rows
+       }).catch(err => {
+         console.error(err.message, err.stack)
+       })
+       console.log(response)
+        return response
+    },
+
+    createProfile: async (profile) => {
+        const{address1, address2, city, state, userID,birthdate} = profile
+        const text = 'INSERT INTO profile (address1, address2, city, state, userID, birthDate) VALUES ($1, $2, $3, $4, $5,$6)';
+        const values =  [address1, address2, city, state, userID, birthdate]
+        
+        const response = await db.query(text, values).then(res => {
+            return res.rows
+        }).catch(err => {
+            return new Error(err.message, err.stack)
         })
+        return response
     }
-
 }
+

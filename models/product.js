@@ -1,21 +1,16 @@
 
 class product {
-    constructor(productNo, productName, productDescription, productVendor, price, totalQuantity, quantityBySize, img){
+    constructor(productNo, productName, productDescription, productVendor, price, totalQuantity, quantitybySize, img){
         this.product_no=productNo
         this.product_name=productName
         this.product_description=productDescription
         this.product_vendor=productVendor
         this.price=price
         this.total_Quantity=totalQuantity
-        this.quantity_BySize=quantityBySize
-        this.createDate=this.createDate()
+        this.quantity_bySize=quantitybySize
+        
     }
-    get total_Quantity(){
-        return this.total_Quantity
-    }
-    set total_Quantity(order){
-        return order
-    }
+    
     /**
      * @param {number} date
      */
@@ -33,12 +28,12 @@ class product {
 
     }
 
-    createDate(){
-        if(this.createDate){
-            return this.createDate
-        }
-        return Date.now()
-    }
+    // createDate(){
+    //     if(this.createDate){
+    //         return this.createDate
+    //     }
+    //     return Date.now()
+    // }
 }
 module.exports={
     product

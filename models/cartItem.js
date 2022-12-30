@@ -1,10 +1,10 @@
 const { product } = require("./product");
 
 class cartItem extends product{
-    constructor(cartItemNo, quantity){
+    constructor( quantity, productID){
         super()
-        this.cartItemNo= cartItemNo
-        this.productID = this.productID
+
+        this.productID = productID
         this.quantity= quantity
     }
 
@@ -17,6 +17,7 @@ class cartItem extends product{
  findSubTotal(price){
   this.subTotal =  this.quantity * price
  }
+
 
 
 }

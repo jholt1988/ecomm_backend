@@ -1,0 +1,25 @@
+{
+    "sqltools.connections": [
+    
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "baseball",
+            "database": "baseball",
+            "username": "postgres",
+            "password": "Jordan"
+        },
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "bentley_ecommerce",
+            "database": "bentley_estore",
+            "username": "jholt",
+            "password": "Admin"
+        }
+    ]
+}

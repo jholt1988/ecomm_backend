@@ -7,29 +7,34 @@ module.exports = {
      * @RETURNS A json list of users
      */
 
-   getAllUsers: () => db.query("SELECT * FROM users", (err,res)=>{
-        if(err){
-            console.error(err.message, err.stack)
-        }
-        if(res){
-            console.log(res.rows[0])
-            return res.rows[0]
-        }
-    }), 
+   getAllUsers: async ()=> {
+   const response = await  db.query("SELECT * FROM users").then(res => {
+      if(res){
+        return res.rows
+      }
+      return 
+   }).catch(err => {
+      return new Error(err.message, err.stack)
+   })
+         return response   
+        
+    }, 
 
-    getUserByID: (id) =>{ 
-        const text = "SELECT * FROM users WHERE id=$1"
+    getUserByID:async (id) =>{ 
+        const text = "SELECT * FROM users WHERE id = $1"
         const values = [id]
         
-        db.query(text, values, (err,res) =>{
+      const response =  await  db.query(text, values) 
+       .then((res) =>{
+
+            return res.rows[0]
+        }
+    ).catch(err => {
         if(err){
             console.log(err.message, err.stack)
         }
-        if(res){
-            console.log(res.rows[0])
-            return res.rows[0]
-        }
     })
     
+    return response
 }
 }

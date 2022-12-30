@@ -12,14 +12,16 @@ const pool = new Pool({
 
 module.exports ={
 
-    query: (text, params, callback) => {
+    query: async (text, params) => {
         const start = Date.now()
-        return pool.query(text, params, (err, res) => {
-            const duration = Date.now() - start
+        const res = await  pool.query(text, params)
+        const duration = Date.now() - start
             console.log('executed query', {text, duration, rows: res.rowCount})
-            callback(err, res)
-        })
-    },
+           return res
+          
+        }
+
+    ,
 
     getClient: (callback) => {
         pool.connect((err, done) => {

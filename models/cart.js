@@ -1,12 +1,20 @@
 const order = require("./order")
 
 class cart{
-    constructor(cartID,profileID){
-        this.cartID=cartID
+    constructor(profileID, cartItems){
         this.profileID=profileID
-        this.cartItems=[]
-    }
+        this.cartItems=cartItems
+        
 
+    }
+   get cartID(){
+    return this.cartID
+   }
+    set cartID(profileID){
+      return`${profileID}.`+ Date.now().toString()
+       
+    }
+   
     get CartTotal(){
       return  this.cartItems.reduce((prevValue,cartItem) => {
             
@@ -34,8 +42,10 @@ class cart{
         subTotal: this.CartTotal
        }) 
 
+
        return newOrder
     }
+
     }
 
 
