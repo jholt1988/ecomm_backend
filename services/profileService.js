@@ -1,60 +1,50 @@
 const db = require('../db')
-const { profileModel } = require('../models')
+const {profileModel} = require('../models')
+const profileInsta = new profileModel()
+module.exports = class profileService {
+ async get(data){
+   const {id} = data;
+ 
+   try{
+    //Check to see if profile exists
+    const profile =  await profileInsta.getUserByID(id)
 
-module.exports = {
-
-    getUserProfileByID:  async (id) =>{
-
-
-      const text = 'SELECT * FROM profile WHERE id = $1'
-       const values=[id]
-    
-        
-      const response = await db.query(text,values, function (err, res) {
-                if (err) {
-                    console.error(err.stack)
-                } else {
-
-                    console.log(res.rows[0])
-                } 
-                return res.rows[0]
-
-            }
-        ).then(result => {
-            return result.rows
-        }) 
-      return response
-        },
-
-     
-
-    
-
-
-    updateProfile : async (prop, val, id) => {
-        const text = `UPDATE profile SET ${prop} = $1 WHERE id= $2`
-        const values = [ val, id]
-
-       const response = await  db.query(text, values).then(res =>{
-        return res.rows
-       }).catch(err => {
-         console.error(err.message, err.stack)
-       })
-       console.log(response)
-        return response
-    },
-
-    createProfile: async (profile) => {
-        const{address1, address2, city, state, userID,birthdate} = profile
-        const text = 'INSERT INTO profile (address1, address2, city, state, userID, birthDate) VALUES ($1, $2, $3, $4, $5,$6)';
-        const values =  [address1, address2, city, state, userID, birthdate]
-        
-        const response = await db.query(text, values).then(res => {
-            return res.rows
-        }).catch(err => {
-            return new Error(err.message, err.stack)
-        })
-        return response
+    //if profile not found reject
+    if(!profile){
+        throw new Error('404-ERROR PROFILE NOT FOUND')
     }
+    return profile
+   }catch(err){
+    throw new Error(err.message, err.stack )
+   }
+ }
+  
+ async post(data){
+
+ try {
+  const profile = await profileInsta.create(data)
+  if(!profile){
+     throw new Error('404-ERROR-Profile Not Created')
+  }
+  return profile
+ } catch (err) {
+  throw new Error(err.message, err.stack)
+ }
+
+ }
+
+async update(data, id){
+  const {field, value} = data
+try {
+  const profile = profileInsta.updateProfile(field, value, id)
+  if(!profile){
+    throw new Error('404-ERROR- PROFILE NOT UPDATED')
+  }
+  return profile
+} catch (err) {
+  throw new Error(err.message, err.stack)
+}
+ }
+
 }
 

@@ -1,40 +1,110 @@
+const  db  = require("../db")
+const moment = require('moment')
+const pgp = require("pg-promise")({capSQL:true})
+module.exports = class product {
+    constructor(data= {}){
+        this.product_no=data.productNo
+        this.product_name=data.productName
+        this.product_description=data.productDescription
+        this.product_vendor=data.productVendor
+        this.price=data.price
+        this.total_Quantity=data.totalQuantity
+        this.quantity_bySize=data.quantitybySize
+        this.img= data.img
+        this.catergory=data.catergory
+        this.createdate = moment.utc().toISOString()|| data.createDate
+        this.modDate = moment.utc().toISOString()
+    }
+    get createdate(){
+      
+      return moment.utc().toISOString()
+      
+    }
 
-class product {
-    constructor(productNo, productName, productDescription, productVendor, price, totalQuantity, quantitybySize, img){
-        this.product_no=productNo
-        this.product_name=productName
-        this.product_description=productDescription
-        this.product_vendor=productVendor
-        this.price=price
-        this.total_Quantity=totalQuantity
-        this.quantity_bySize=quantitybySize
-        
+    set createdate(newDate){
+      newDate = moment.utc().toISOString();
+      
     }
+    async createProduct (productInfo) {
+        productInfo.createdate=this.createdate
+      const statement = pgp.helpers.insert(productInfo, null, 'products') + 'RETURNING *'
+
+
+      const response = await db.query(statement).then((result) => {
+        if(result){ 
+            
+            return result.rows[0]
+        }
+
+      }, (err) => {
+        console.log(new Error(err.message, err.stack))
+      }). catch((err) => {
+            throw new Error(err.message, err.stack )
+      })
+ 
+return response
+
+    }
+
+async getAllProducts () {
+        const text = "SELECT * FROM PRODUCTS"
+
+        const response = await db.query(text).then((result) => {
+            if(result){
+                return result.rows
+            }
+        }).catch((err) => {
+            return new Error(err.message, err.stack)
+        })
+
+        return response
+    }
+
+    async updateProduct (field,value, id) {
+    const text = `UPDATE products SET ${field} = $1 WHERE product_no = $2`   
+   const values=[value, id]     
+   console.log(value, id)
+   try{
+   const response=  await db.query(text, values)
+
+   if(response.rowCount !== 1){
+    throw new Error('404-Product Not Updated')
+   }
+   return response.rowCount
+    } catch(err){
+      throw new Error(err.message, err.stack)
+    }
+  }
+
+    async getProductByID (productno) {
+    const text ='SELECT * FROM products WHERE product_no = $1';
+    const value = [productno]
+
+    const response = await db.query(text, value).then((result) => {
+      return result.rows 
+    }).catch((err) => {
+      return new Error(err.message, err.stack)
+    })
+      return response
+  }
+
+  async getProductsByCatergory(catergory){
+    try {
+        const text = 'SELECT * FROM products WHERE "catergory" = $1'
+        const values = [catergory]
+        const result = await db.query(text, values);
+        if(result.rows?.length){
+            return result.rows
+        }
+    } catch (err) {
+        throw new Error(err.message, err.stack)
+    }
+  }
     
-    /**
-     * @param {number} date
-     */
-    set modDate(date){
-        return date = Date.now();
-    }
     order(orderQuan){
       this.total_Quantity = this.total_Quantity - orderQuan
       return this.total_Quantity
     }
 
-    update(prop, val){
-        this[prop] = val
-        return this.modDate = Date.now();
-
-    }
-
-    // createDate(){
-    //     if(this.createDate){
-    //         return this.createDate
-    //     }
-    //     return Date.now()
-    // }
-}
-module.exports={
-    product
+   
 }

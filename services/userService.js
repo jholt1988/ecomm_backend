@@ -1,40 +1,65 @@
 const pg = require("pg");
-const db = require('../db')
+const db = require('../db');
+const {userModel} = require('../models');
+const {profileModel}= require('../models')
 
-module.exports = {
+const userModelInsta =  new userModel()
+const profileModelInsta = new profileModel()
+
+module.exports = class  userService {
     /**
-     * Get all users 
-     * @RETURNS A json list of users
+     * GET USER RECORD BY ID
+     * @param {string} data [User ID] 
+     * @returns {Object | null} [User Record]
      */
 
-   getAllUsers: async ()=> {
-   const response = await  db.query("SELECT * FROM users").then(res => {
-      if(res){
-        return res.rows
-      }
-      return 
-   }).catch(err => {
-      return new Error(err.message, err.stack)
-   })
-         return response   
-        
-    }, 
+ async getUserByID(data){
+    const {id} = data;
+try{
+    //CHECK: Does User Exist
+   const user = await userModelInsta.getUserByID(id)
 
-    getUserByID:async (id) =>{ 
-        const text = "SELECT * FROM users WHERE id = $1"
-        const values = [id]
-        
-      const response =  await  db.query(text, values) 
-       .then((res) =>{
+   //RESUlT-User Doesn't Exist-REJECT
 
-            return res.rows[0]
-        }
-    ).catch(err => {
-        if(err){
-            console.log(err.message, err.stack)
-        }
-    })
+   if(!user){
+    throw new Error('404-User Not Found')
+   }
+
+   return user
+ } catch(err){
+    throw err
+ }
+ }
+
+ async create(data){
     
-    return response
-}
+    try{
+    
+        const user = await userModelInsta.create(data);
+        const newProfile = new profileModel()
+        const profile = await newProfile.create({userID:user.id, ...profile})
+
+        if(!user || !profile){
+            throw new Error('404 ERROR- USER NOT CREATED')
+        
+        }
+    
+        return{ user, profile}
+    } catch(err){
+        throw new Error(err.message, err.stack)
+    }
+ }
+
+ async updateUser(data, id){
+    try{
+        const user = await userModelInsta.updateUser(data, id);
+        if(!user){
+            throw new Error('404-User Not Updated')
+        }
+        return user
+    } catch(err){
+        throw new Error(err.message, err.stack)
+    }
+ }
+
 }

@@ -1,36 +1,61 @@
+const  db  = require("../db");
 const { cart } = require("./cart");
 const { delivery } = require("./delivery");
+const format = require('pg-format');
 
 
 
-class order {
-    constructor( items,deliveryTypeID ){
+module.exports = class order {
+    constructor( {}= data){
     
-        this.orderID=orderID
-        this.profileID=profileID
-        this.items = items
-        this.deliveryTypeID=deliveryTypeID
+        this.orderID=data.orderID
+        this.profileID=data.profileID
+        this.items = data.items
+        this.deliveryTypeID=data.deliveryTypeID
         this.total = this.calcTotal()
-        this.createDate=this.createDate()
+        this.createDate = moment.utc().toISOString | data.createDate
+        this.modDate = moment.utc().toISOString
+        this.orderStatus= data.orderStatus
+        this.deliveryFee = data.deliveryFee
         
     }
-    
-    set modDate(date){
-        date= Date.now();
-        return date
-    }
+     async create(data){
+        const{orderID,profileID, items, deliveryTypeID, total, createDate, modDate, orderStatus, deliveryFee} = data
+        try{
+            const text = `INSERT INTO orders (orderID,profileID, items, deliveryTypeID, total, createDate, modDate, orderStatus, deliveryFee) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`
+            const values=[orderID,profileID, items, deliveryTypeID, total, createDate, modDate, orderStatus, deliveryFee]
 
-    get subTotal(){
-        return this.calcSubTotal()
-    }
-     
-   
-    createDate(){
-        if(this.createDate){
-            return this.createDate
+            const result = await db.query(text,values);
+
+            if(result.rows?.length){
+                return result.rows[0]
+            }
+            return null
+        }catch(err){
+            throw new Error(err.message, err.stack)
         }
-        return Date.now()
-    }
+     }
+   /**  
+     * UPDATE USER Order
+     * @param {object} data [{Field, value}] 
+     * @returns 
+     */
+   async updateOrder (data){
+    try{
+    const {field, value} = data
+    const text = format('UPDATE users SET %I=%L WHERE "id" = %L',field, value, this.orderID)
+    console.log(text);
+   const result = await db.query(text);
+   if(result.rows?.length){
+    return result.rowCount
+   }
+   null
+} catch(err){
+    throw new Error(err.message, err.stack)
+}
+   }
+
+
     calcSubTotal(){
        return this.items.reduce((total, itemTotal) =>{
         
@@ -48,16 +73,6 @@ class order {
         return newDelivery
     }
 
-    get deliveryFee(){
-        return this.deliveryFee
-    }
-
-    set deliveryFee(fee){
-
-        fee = this.createDelivery().deliveryType(this.deliveryTypeID).fee
-
-        return fee
-    }
 
     set orderStatus(status){
         const statusOptions = {
@@ -67,12 +82,8 @@ class order {
             enRoute:"EN ROUTE",
             delivered:"DELIVERED"
         }
-        this.modDate = Date.now();
         return statusOptions[status]
         
     }
     
-}
-module.exports={
-order
 }

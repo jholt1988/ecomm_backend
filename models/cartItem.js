@@ -1,19 +1,33 @@
-const { product } = require("./product");
+const  product  = require("./product");
 
-class cartItem extends product{
-    constructor( quantity, productID){
+module.exports = class cartItemModel extends product{
+    constructor( {} = data){
         super()
 
-        this.productID = productID
-        this.quantity= quantity
+        this.product_no =data.product_no
+        this.quantity= data.quantity
+        this.subTotal = this.findSubTotal(this.price)
     }
 
- get quantity(){
-    return this.quantity
+  async createItem(){
+    try{
+    const product = await this.getProductByID(this.productID)
+     if(product){
+     this.price = product.price
+     return product
+     }
+
+    }catch(err){
+        throw new Error(err.message, err.stack )
+    }
  }
- set quantity(num){
-    return num 
+
+ changeQuantity(newQuantity){
+    this.quantity = newQuantity
+    return this.quantity 
+
  }
+
  findSubTotal(price){
   this.subTotal =  this.quantity * price
  }
@@ -23,6 +37,3 @@ class cartItem extends product{
 }
 
 
-module.exports={
-    cartItem:cartItem
-}

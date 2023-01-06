@@ -1,2 +1,7 @@
-SELECT * from db.schemas.tables
+SELECT * from cart
+
+
+
+
+
 

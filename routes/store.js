@@ -3,19 +3,19 @@ const { db } = require("../config");
 const router = Express.Router();
 const {productModel} = require('../models');
 const {productService} = require('../services');
-
+const productServiceInst = new productService()
 module.exports = (app) => {
     app.use('/store', router)
 
     router.post('/addproduct', async (req, res, next) => {
-       const {product_no, product_name, product_description, product_vendor, price, total_quantity, quantity_bysize} = req.body
-    
-       await productService.createProduct({product_no, product_name, product_description, product_vendor, price, total_quantity, quantity_bysize}).then((result ) => {
-        res.send(result)
+        try{
+     const response =   await productServiceInst.createProduct(req.body)
+        res.send(response)
         next()
-        }).catch((err) => {
+        }
+        catch(err) {
           next(new Error(err.message, err.stack))
-       })
+       }
           
        })
     
@@ -32,26 +32,35 @@ module.exports = (app) => {
     
     router.put('/products/:productno', async (req, res, next) => {
         const {productno} = req.params
-        
-        const field = Object.keys(req.body)
-        const value = req.body[field]
-        await productService.updateProduct(field[0], value, productno).then((result) => {
-            res.status(202).send(result)
+        const {field, value}= req.body
+        const info = {field, value, productno}
+        console.log(info)
+        try {
+            const product = await productServiceInst.updateProduct(info)
+            if(product === 1){
+            res.send(`${productno} ${field} was updated to ${value}`)
             next()
-        }).catch((err)=>{
-            next(new Error(err.message, err.stack))
-        })
-    })
-
+            }
+            next()
+        } catch (err) {
+            throw new Error(err.message, err.stack)
+        }
+        
+        await productService.updateProduct
+})
     router.get('/products/:productno', async(req, res, next) =>{
         const {productno} = req.params
-
-        await productService.getProductByID(productno).then((result)=>{
-            res.status(200).send(result)
-            next()
-        }).catch((err) => {
+        try{
+       const response = await productServiceInst.getByID(productno)
+       if(response){
+        res.status(202).send(response)
+        next()
+       }
+     next()
+        }
+        catch(err){
             next(new Error(err.message, err.stack))
-        })
+        }
     })
 
 }
