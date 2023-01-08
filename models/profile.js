@@ -11,23 +11,23 @@ module.exports = class profile{
         this.state=data.state || ""
         this.zip=data.zip || ""
         this.birthdate=moment(data.birthdate).toISOString || ""
-        this.profileID=uuidv4()
+        this.id=uuidv4()
         this.userID = data.userID|| ""
     }
 
-    get id(){
-      return uuidv4()
+    get _id(){
+      return this._id
     }
 
-    set id(id){
-      this.id = uuidv4()
+    set _id(id){
+      this._id = id
     }
 
     /**
      * @param {string} userID [userID ]
      * @returns {object| null} [Profile Record]
      */
-  async create(profileInfo){
+  async createProfile(profileInfo){
     const {userID,} = profileInfo
     
      try {

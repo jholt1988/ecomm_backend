@@ -22,7 +22,7 @@ module.exports = class profileService {
  async post(data){
 
  try {
-  const profile = await profileInsta.create(data)
+  const profile = await profileInsta.createProfile(data)
   if(!profile){
      throw new Error('404-ERROR-Profile Not Created')
   }

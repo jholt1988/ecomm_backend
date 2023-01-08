@@ -8,10 +8,9 @@ module.exports = class product {
         this.product_description=data.productDescription
         this.product_vendor=data.productVendor
         this.price=data.price
-        this.total_Quantity=data.totalQuantity
-        this.quantity_bySize=data.quantitybySize
+        this.total_quantity=data.totalQuantity
+        this.quantity_bysize=data.quantitybySize
         this.img= data.img
-        this.catergory=data.catergory
         this.createdate = moment.utc().toISOString()|| data.createDate
         this.modDate = moment.utc().toISOString()
     }
@@ -76,16 +75,18 @@ async getAllProducts () {
     }
   }
 
-    async getProductByID (productno) {
+    async getProductByID (productno, client) {
     const text ='SELECT * FROM products WHERE product_no = $1';
     const value = [productno]
+try{
+      const response = await client.query(text, value)
+      return  response.rows[0]
+    
 
-    const response = await db.query(text, value).then((result) => {
-      return result.rows 
-    }).catch((err) => {
+    }catch(err) {
       return new Error(err.message, err.stack)
-    })
-      return response
+    }
+    
   }
 
   async getProductsByCatergory(catergory){

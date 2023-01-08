@@ -1,7 +1,8 @@
 const db = require('../db');
 const {cartModel}= require('../models');
 const {cartItemModel} = require('../models');
-const user = require('../routes/user');
+
+
 
 
 module.exports = class cartService {
@@ -21,14 +22,31 @@ module.exports = class cartService {
       }
     }
 
-async AddItemsToCart  (item, quantity)  {
-const newItem = new cartItemModel(quantity, item)
-db.query('UPDATE userCart SET cartItems')
-newCartItem.findSubTotal
-cartItems.push(newCartItem, ...cartItems)
-
-return cartItems
+async loadCartByProfileID (profileID){
+  try {
+    const userCart = await cartModel.loadByProfileID(profileID)
+     if(userCart){
+      return userCart
+     }
+    
+  } catch (err) {
+    throw new Error(err.message, err.stack)
+  }
 }
+async AddItemsToCart  (product_no, quantity, profileID)  {
+ try{
+  const cart  =  new cartModel({profileID})
+  const response = await cart.addItem(product_no, quantity, profileID);
+  return response
+ }catch (err){
+  throw new Error(err.message, err.stack )
+ }
+
+
+   }
+
+
+
 
 DeleteItemsFromCart(){
    const item = cartItems.find(this.findCartitem(cartItem,cartItemNo))

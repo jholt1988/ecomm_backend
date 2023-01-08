@@ -26,13 +26,28 @@ module.exports = (app) => {
 
    router.put('/:profileID/add/', async (req, res, next) => { 
    const {profileID} = req.params
-    const {quantity,productNo } = req.body 
-    await cartService.AddItemsToCart(productNo, quantity).then((result)=>{
-           res.status(200).send(result)
-           next()
-    }).catch((err) => {
-        next(new Error(err.message, err.stack))
-    })
+    const {quantity,product_no } = req.body 
+   try{
+    const response = await cartServiceInsta.AddItemsToCart(product_no, quantity, profileID)
+    res.status(200).send(response)
+    next()
+   } catch(err){
+    next(new Error(err.message, err.stack))
+   }
      
+   })
+
+   router.get('/:profileID', async (req, res, next) => {
+    const {profileID} = req.params
+    try{
+      const response = await cartServiceInsta.loadCartByProfileID(profileID);
+      if(!response){
+        next('404-ERROR CART NOT LOADED')
+      }
+      res.status(202).send(response)
+      next()
+    }catch(err){
+      next( new Error(err.message, err.stack))
+    }
    })
 }

@@ -1,7 +1,1 @@
-SELECT * from cart
-
-
-
-
-
-
+SELECT * FROM "products"

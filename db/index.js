@@ -1,4 +1,4 @@
-const { Pool, client } = require("pg");
+const { Pool, Client } = require("pg");
 
 const {db} = require('../config')
 const pool = new Pool({
@@ -24,11 +24,11 @@ module.exports ={
     ,
 
     getClient: (callback) => {
-        pool.connect((err, done) => {
+        pool.connect((err,client, done) => {
           const query = client.query
      
           // monkey patch the query method to keep track of the last query executed
-          client.query = (...args) => {
+           client.query = (...args) => {
             client.lastQuery = args
             return query.apply(client, args)
           }
