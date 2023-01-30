@@ -2,38 +2,38 @@
 const {v4: uuidv4} = require('uuid');
 const format = require('pg-format');
 const  db = require('../db');
-const moment = require('moment')
+const moment = require('moment');
+const pgp = require('pg-promise')({capSQL: true});
+
 module.exports = class profile{
     constructor(data= {}){
-        this.address1=data.address1 || " "
+      this.id=uuidv4()  
+      this.address1=data.address1 || " "
         this.address2=data.address2 || ""
         this.city=data.city|| ""
         this.state=data.state || ""
         this.zip=data.zip || ""
-        this.birthdate=moment(data.birthdate).toISOString || ""
-        this.id=uuidv4()
+        this.birthdate=moment(data.birthdate).toISOString() || ""
+        
         this.userID = data.userID|| ""
     }
 
-    get _id(){
-      return this._id
-    }
-
-    set _id(id){
-      this._id = id
-    }
+    
 
     /**
      * @param {string} userID [userID ]
      * @returns {object| null} [Profile Record]
      */
-  async createProfile(profileInfo){
-    const {userID,} = profileInfo
+  async createProfile(){
+    
     
      try {
-      const text =format('INSERT INTO profile ("userID", "id") VALUES (%L, %L) RETURNING *', userID, this.id)
-      const result = await db.query(text);
+      const {...profile} = this
+      const statement = pgp.helpers.insert(profile, null, "profile") + 'RETURNING *'
+      const result = await db.query(statement)
+      
       if(result.rows?.length){
+        Object.assign(this,result.rows[0])
         return result.rows[0]
       }
   
@@ -67,15 +67,18 @@ module.exports = class profile{
 
 async getUserProfileByID(userID){
   try {
-    const text = 'SELECT * FROM profile WHERE "userID" = $1'
-    const values=[userID];
-
+    console.log(typeof(userID))
+    const text =
+    `SELECT * FROM profile                                                                                                                                                                                  
+                  WHERE "userID" = $1`
+    const values= [ userID ];
+    console.log(values)
     const result = await db.query(text,values);
 
     if(result.rows?.length){
       return result.rows[0]
     }
-    return null
+    
   } catch (err) {
     throw new Error(err.message, err.stack)
   }

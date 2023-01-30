@@ -3,8 +3,8 @@ const profile = require('./profile');
 const product = require('./product');
 const cart = require('./cart');
 const cartItem = require('./cartItem');
-const {order} = require('./order');
-const {delivery} = require('./delivery');
+const order = require('./order');
+const delivery = require('./delivery');
 
 module.exports={
     userModel:  user ,

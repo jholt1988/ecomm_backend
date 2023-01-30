@@ -1,6 +1,7 @@
 {
     "sqltools.connections": [
     
+    
         {
             "previewLimit": 50,
             "server": "localhost",

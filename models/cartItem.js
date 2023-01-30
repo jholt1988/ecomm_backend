@@ -1,47 +1,119 @@
-const  product  = require("./product");
-const { prototype } = require("./user");
+const db = require('../db');
+const pgp = require('pg-promise')({ capSQL: true });
 
-module.exports = class cartItemModel extends product{
-    constructor(data = {}){
-        super()
+module.exports = class CartItemModel {
 
-        this.product_no =data.product_no
-        this.quantity= 0 || data.quantity
-        this.subTotal = 0 || this.findSubTotal()
-    }
+  /**
+   * Creates a new cart line item
+   * @param  {Object}      data [Cart item data]
+   * @return {Object|null}      [Created cart item]
+   */
+  static async create(data) {
+    try {
 
-  async createItem(product_no){
-    try{
-    const product = await this.getProductByID(product_no)
-    console.log(product)
-    
-     if(product){
-      for(let prop of Object.entries(product)){
-        console.log(prop)
-          this[prop[0]] = prop[1]
-          
+      // Generate SQL statement - using helper for dynamic parameter injection
+      const statement = pgp.helpers.insert(data, null, 'cartitems') + 'RETURNING *';
+ 
+      // Execute SQL statment
+      const result = await db.query(statement);
+
+      if (result.rows?.length) {
+        return result.rows[0];
       }
-     return this
-     }
 
-    }catch(err){
-        throw new Error(err.message, err.stack )
+      return null;
+
+    } catch(err) {
+      throw new Error(err);
     }
- }
+  }
 
- changeQuantity(newQuantity){
-    this.quantity = newQuantity
-    return this.quantity 
+  /**
+   * Updates existing cart item
+   * @param  {Object}      data [Cart item data]
+   * @param  {Object}      id   [Cart item id]
+   * @return {Object|null}      [Updated cart item]
+   */
+  static async update(id, data) {
+    try {
 
- }
+      // Generate SQL statement - using helper for dynamic parameter injection
+      const condition = pgp.as.format('WHERE id = ${id} RETURNING *', { id });
+      const statement = pgp.helpers.update(data, null, 'cartitems') + condition;
+  
+      // Execute SQL statment
+      const result = await db.query(statement);
 
- findSubTotal(){
-  const subTotal =  this.quantity * this.price
-   return subTotal
- }
+      if (result.rows?.length) {
+        return result.rows[0];
+      }
 
+      return null;
 
+    } catch(err) {
+      throw new Error(err);
+    }
+  }
+
+  /**
+   * Retrieve cart items for a cart
+   * @param  {Object} cartId [Cart ID]
+   * @return {Array}         [Created cart item]
+   */
+  static async find(cartId) {
+    try {
+
+      // Generate SQL statement
+      const statement = `SELECT 
+                            ci.qty,
+                            ci.id AS "cartItemId", 
+                            p.*
+                         FROM "cartitems" ci
+                         INNER JOIN products p ON p.product_no = ci."productid"
+                         WHERE "cartid" = $1`
+      const values = [cartId];
+  
+      // Execute SQL statment
+      const result = await db.query(statement, values);
+
+      if (result.rows?.length) {
+        return result.rows;
+      }
+
+      return [];
+
+    } catch(err) {
+      throw new Error(err);
+    }
+  }
+
+  /**
+   * Deletes a cart line item
+   * @param  {Object}      id [Cart item ID]
+   * @return {Object|null}    [Deleted cart item]
+   */
+  static async delete(id) {
+    try {
+
+      // Generate SQL statement
+      const statement = `DELETE
+                         FROM "cartItems"
+                         WHERE id = $1
+                         RETURNING *`;
+      const values = [id];
+  
+      // Execute SQL statment
+      const result = await db.query(statement, values);
+
+      if (result.rows?.length) {
+        return result.rows[0];
+      }
+
+      return null;
+
+    } catch(err) {
+      throw new Error(err);
+    }
+  }
 
 }
-
-

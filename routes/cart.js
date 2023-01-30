@@ -1,3 +1,4 @@
+
 const Express = require('express');
 const router = Express.Router();
 const {cartService} = require('../services');
@@ -7,10 +8,10 @@ const cartServiceInsta = new cartService()
 module.exports = (app) => {
    app.use('/cart', router)
 
-   router.post('/:profileID', async (req, res, next) => {
-    const {profileID} = req.params
+   router.post('/mycart', async (req, res, next) => {
+const userID = req.user.id
    try{
-    const userCart = await cartServiceInsta.create(profileID)
+    const userCart = await cartServiceInsta.create(userID)
     if(!userCart){
       next('404-ERROR CART NOT CREATED')
     }
@@ -24,11 +25,11 @@ module.exports = (app) => {
     
    
 
-   router.put('/:profileID/add/', async (req, res, next) => { 
-   const {profileID} = req.params
-    const {quantity,product_no } = req.body 
+   router.post('/mycart/add/', async (req, res, next) => { 
+   const userID = req.user.id
+    const {quantity,product } = req.body 
    try{
-    const response = await cartServiceInsta.AddItemsToCart(product_no, quantity, profileID)
+    const response = await cartServiceInsta.AddItemsToCart(product, quantity, userID)
     res.status(200).send(response)
     next()
    } catch(err){
@@ -37,10 +38,10 @@ module.exports = (app) => {
      
    })
 
-   router.get('/:profileID', async (req, res, next) => {
-    const {profileID} = req.params
+   router.get('/mycart', async (req, res, next) => {
+    const userID = req.user.id
     try{
-      const response = await cartServiceInsta.loadCartByProfileID(profileID);
+      const response = await cartServiceInsta.loadCartByUserID(userID);
       if(!response){
         next('404-ERROR CART NOT LOADED')
       }
@@ -48,6 +49,19 @@ module.exports = (app) => {
       next()
     }catch(err){
       next( new Error(err.message, err.stack))
+    }
+   })
+
+   router.post('/mycart/checkout', async (req, res, next) => {
+    const userID = req.user.id
+    const {paymentInfo, deliveryType} = req.body
+    try{
+      const result = await cartServiceInsta.checkout(userID, paymentInfo, deliveryType)
+
+      res.status(200).send(result)
+      next()
+    } catch(err){
+      next(err.message, err.stack)
     }
    })
 }

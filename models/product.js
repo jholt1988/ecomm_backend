@@ -79,7 +79,7 @@ async getAllProducts () {
     const text ='SELECT * FROM products WHERE product_no = $1';
     const value = [productno]
 try{
-      const response = await client.query(text, value)
+      const response = await db.query(text, value)
       return  response.rows[0]
     
 

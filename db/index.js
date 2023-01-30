@@ -1,5 +1,4 @@
-const { Pool, Client } = require("pg");
-
+const { Pool } = require("pg");
 const {db} = require('../config')
 const pool = new Pool({
   user: db.user, 
@@ -13,14 +12,19 @@ const pool = new Pool({
 module.exports ={
 
     query: async (text, params) => {
+      try{
         const start = Date.now()
         const res = await  pool.query(text, params)
         const duration = Date.now() - start
             console.log('executed query', {text, duration, rows: res.rowCount})
-           return res
           
+            return res
+          
+        } catch (err){
+          throw new Error(err.message, err.stack)
         }
-
+      
+      }
     ,
 
     getClient: (callback) => {

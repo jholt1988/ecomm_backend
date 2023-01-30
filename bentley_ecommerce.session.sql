@@ -1,1 +1,3 @@
-SELECT * FROM "products"
+SELECT EXPLAIN TABLE "cartitems"
+
+

@@ -6,58 +6,44 @@ const  db  = require('../db');
 const pgp = require('pg-promise')({capSQL: true})
 const format = require('pg-format')
 
-module.exports = class user {
-    contructor(data = {}){
+module.exports = class User {
+    constructor(data = {}){
+
         this.id = uuidv4()
-        this.firstName= data.firstName
-        this.lastName = data.lastName
-        this.email = data.email
+        this.firstName= data.firstName ||""
+        this.lastName = data.lastName || ""
+        this.email = data.email || " "
         this.createDate = data.createDate || moment.utc().toISOString()
         this.modDate = moment.utc().toISOString()
-        this.userName = data.userName
-        this.password = this.hashPassword(data.password)
-
-    }
-    get id(){
-        return uuidv4()
+        this.username = data.username || ""
+        
+        
+    
     }
  
-    setId(newId){
-    
-        this.id = uuidv4()
-    }
-    get createDate(){
-        return  moment.utc().toISOString()
-    }
 
-    get modDate(){
-        return  moment.utc().toISOString()
-    }
+
  /**
   * 
   * @param {Object} userInfo [User data]
   * @returns {Object|null} [Created User Record]  
   */
 
-   async create(userInfo){
-    
+   async create(){
+   
     try{
-        const {firstName, lastName, password, email, username} = userInfo
-       const  id = this.id
-       const createDate = this.createDate
-       const modDate = this.modDate
-        const data = {id, firstName, lastName, password, email,username,createDate, modDate,} 
-        const statement = pgp.helpers.insert(data,null, 'users') + 'RETURNING *'
-       // const {firstName, lastName, password, email, username, createDate, modDate} = userInfo
-///const text = 'INSERT INTO users ( "id", "firstName", "lastName", "password", "email", "username", "createDate", "modDate") VALUES($1, $2, $3, $4, $5, $6, $7, $8 ) RETURNING *'
-   //   const values = [, firstName, lastName, password, email, username, this.createDate, this.modDate]
-    const result =await db.query(statement);
+        
+    const {...user} = this
+        const statement = pgp.helpers.insert(user, null, 'users') + 'RETURNING *'
+    const result = await db.query(statement)
     if(result.rows?.length){
+        Object.assign(this, result.rows[0])
         return result.rows[0]
-    }
+       }
+    
     return null
     }catch(err){
-      throw new Error(err.message, err.stack)
+      throw  Error(err.message, err.stack)
     }
 }
  /**
@@ -74,7 +60,7 @@ module.exports = class user {
             const result = await db.query(text, values);
             
             if(result.rows?.length){
-                return result.rows;
+                return result.rows[0]
             }
             return null
         }catch(err){
@@ -102,34 +88,66 @@ async updateUser(data, id){
 }
    }
    /**
-    ENCRYPT USER  
+    ENCRYPT USER PASSWORD
     * @param {string} password [user input]
     * @returns {string | err}  [hashed password]
     */
-    hashPassword(password){
-        bcrypt.genSalt(15, (err, salt) => {
-            bcrypt.hash(password, salt, (err, hash) =>{
-                this.password= hash
+
+      hashPassword(password){
+       bcrypt.genSalt(15,  (err, salt) => {
+            bcrypt.hash(password, salt, async (err, hash) => {
+                if(err){
+                    return err
+                }
+                const data = {id:this.id, password:hash}
+                const condition = pgp.as.format(' WHERE id= ${id}', data) 
+                const statement=  pgp.helpers.update(data, ['password'],'users') + condition
+
+                   const result = await db.query(statement)
+
+                   return result.rows
+
+              
             })
+            
         })
-    }
+        }
+    
     /**
      * compare user input password with hashed password
-     * @param {string} password [user input] 
+     * @param {stringi} password [user input] 
      * @returns {boolean} 
      */
-    comparePassword(password){
-        bcrypt.compare(password, this.password, (err, res) => {
+     comparePassword(password, hashPassword){
+        bcrypt.compare(password, hashPassword, (err, res) => {
             if(err){
                 return console.error('Error', err.stack)
             }
-            else if(!res){
-                return console.log('password incorrect')
+         if(res === false){
+                 console.log('password incorrect')
+                 return res
             }
-            return console.log('password correct')
+
+             console.log('password correct')
+             return res
         })
     }
-   
+    
+    
+    async findByUsername(username){
+        const text = 'SELECT * FROM users WHERE "username" = $1'
+        const values = [username]
+        try{
+        const result = await db.query(text, values)
 
+        
+        if(result.rows){
+           return result.rows[0]
+        }
+    } catch(err){
+        throw err
+    }
+    }
+ 
 }
 

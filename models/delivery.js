@@ -1,26 +1,33 @@
-class delivery {
-    constructor(shippingAddr1,
-        shippingAddr2, 
-        city,
-        state, 
-        zip,
-        profileID, 
-        OrderID,
-        ){
-            this.shippingAddr1=shippingAddr1
-            this.shippingAddr2=shippingAddr2
-            this.city=city
-            this.state= state
-            this.zip=zip
-           this.profileID=profileID
-           this.OrderID=OrderID
-           this.deliveryStatus="PENDING"
-           this.deliveryFee = this.deliveryType.fee
+const db = require('../db')
+
+const pgp = require('pg-promise')({capSQL:true})
+const moment = require('moment');
+const { orderModel } = require('.');
+const Order = require('./order');
+
+module.exports = class delivery{
+    constructor(data = {}){
+        
+
+
+            this.shippingAddr1=data.shippingAddr1 || ""
+            this.shippingAddr2=data.shippingAddr2 || ""
+            this.city=data.city || ""
+            this.state= data.state || ""
+            this.zip=data.zip || ""
+           this.profileID=data.profileID 
+           this.orderID=data.orderID
+           this.deliveryType = data.deliveryType
+           this.deliveryStatus="PENDING" || data.deliveryStatus
+           this.fee =  data.fee
+           this.estArrDate =  data.estArrDate
+           
+
  }
-get deliveryStatus(){
+get _deliveryStatus(){
     return this.deliveryStatus
 }
-set deliveryStatus(status){
+set _deliveryStatus(status){
     const statusOptions = {
         pending:"PENDING",
         cancelled:"CANCELLED",
@@ -28,44 +35,74 @@ set deliveryStatus(status){
         enRoute:"EN ROUTE",
         delivered:"DELIVERED"
     }
-    return statusOptions[status]
+    this.deliveryStatus= statusOptions[status]
     
 }
-/**
-     * @param {string | number} type
-     */
-set deliveryType(type){
-    const deliveryMethods={
-        "ST-GR":{
-            name:"Standard Ground",
-            fee: 10.50,
-            deliveryHours: 60 * 60 * 1000 * 96
-        }, 
-        "EX-GR":{
-            name:"Express Ground",
-            fee: 16.50,
-            deliveryHours: 60 * 60 * 1000 * 48
-        },
-        "EX-OVN":{
-            name:"Express Overnight",
-            fee: 25.00,
-            deliveryHours: 60 * 60 * 1000 * 24
+
+
+
+
+
+async create(){
+    try{
+        const {orderID, profileID, deliveryType,...delivery} = this
+        console.log(this)
+         const statement = pgp.helpers.insert(this, null, 'deliveries') + " RETURNING *"
+       
+        const result = await db.query(statement)
+        console.log(delivery)
+        if(result.rows?.length){
+              Object.assign(this, result.rows[0])
+              console.log(result.rows[0])
+              
+              return result.rows[0]
         }
+        return null
+    } catch(err){
+        throw new Error(err.message, err.stack)
     }
-    return deliveryMethods[type]
 }
-get estArrDate (){
-   return this.calcArrDate()
+
+  async getDeliveryInfo(){
+try {
+   const text = 'SELECT * FROM "delivery_type" WHERE deliverytype_id = $1'
+   const values = [this.deliveryType]
+   console.log(values)
+   const result = await db.query(text, values).then((value) => {
+    return value.rows[0]
+   })
+
+   if(result){
+    const deliveryObj = result
+    console.log(deliveryObj)
+    return  deliveryObj
+   }
+} catch (err) {
+     throw new Error(err.message, err.stack)
 }
-calcArrDate(){
-    const estDate = Date.now() + this.deliveryType.deliveryHours
-    return estDate
 }
+
+ async setFee(){
+const getFee =  await this.getDeliveryInfo()
+const fee = await getFee.fee
+return this.fee = fee
+}
+
+ async calcArrDate(){
+    try{
+        const deliveryHours = await this.getDeliveryInfo()
+        let now = moment()
+    const estDate = now.add(deliveryHours.estarr, "seconds")
+        console.log(estDate)
+    
+   return this.estArrDate= estDate
+    
+    } catch(err){
+        throw new Error(err.message, err.stack)
+    }
+}
+
 
 }
 
 
-
-module.exports={
-    delivery
-}

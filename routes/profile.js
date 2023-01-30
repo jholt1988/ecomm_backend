@@ -8,11 +8,12 @@ const profileServiceInsta = new profileService();
 module.exports = (app) => {
     app.use('/profile', router)
             
-    router.get('/:id/',async  (req, res, next) => {
+    router.get('/',async  (req, res, next) => {
   try{
-    const response =await  profileServiceInsta.get(req.params)
+    
+    const response =await  profileServiceInsta.get(req.user.id)
     if(!response){
-      next(new Error())
+      next()
     }
     res.send(response)
   } catch(err){

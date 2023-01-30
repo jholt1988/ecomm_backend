@@ -1,13 +1,15 @@
 const db = require('../db')
-const {profileModel} = require('../models')
+const {profileModel, userModel} = require('../models')
+const userModelInsta = new userModel
 const profileInsta = new profileModel()
 module.exports = class profileService {
- async get(data){
-   const {id} = data;
+ async get(id){
+   
  
    try{
     //Check to see if profile exists
-    const profile =  await profileInsta.getUserByID(id)
+    
+    const profile =  await profileInsta.getUserProfileByID(id)
 
     //if profile not found reject
     if(!profile){
@@ -44,6 +46,20 @@ try {
 } catch (err) {
   throw new Error(err.message, err.stack)
 }
+ }
+
+ async create(data){
+  const{address1, address2, city, state, zip, birthdate, userID} = data
+  try {
+    const profile = new profileModel({address1, address2, city, state, zip, birthdate, userID})
+
+   const userProfile =  await profile.createProfile()
+
+   return userProfile
+    
+  } catch (err) {
+    throw err
+  }
  }
 
 }

@@ -13,8 +13,7 @@ module.exports = class  userService {
      * @returns {Object | null} [User Record]
      */
 
- async getUserByID(data){
-    const {id} = data;
+ async getUserByID(id){
 try{
     //CHECK: Does User Exist
    const user = await userModelInsta.getUserByID(id)
@@ -34,8 +33,9 @@ try{
  async create(data){
     
     try{
-    
-        const user = await userModelInsta.create(data);
+      const {firstName, lastName, username, password, email, id,} = data
+        const user = new userModel({firstName:firstName, lastName:lastName, username:username, password:password, email:email, id, ...userRecord})
+         await user.create();
         const newProfile = new profileModel()
         const profile = await newProfile.create({userID:user.id, ...profile})
 
